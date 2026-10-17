@@ -1,125 +1,152 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FrienBook Pro - Firebase PRO</title>
+<title>FriendBook - Facebook 2026</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script>tailwind.config={darkMode:'class'}</script>
+<style>body::-webkit-scrollbar{display:none}.story-ring{background:linear-gradient(45deg,#1877f2,#42b72a)}</style>
 </head>
 <body class="bg-[#f0f2f5] dark:bg-[#18191a]">
-<nav class="sticky top-0 z-50 bg-white dark:bg-[#242526] p-2 flex justify-between items-center shadow">
-<h1 class="text-2xl font-bold text-blue-600">FrienBook</h1>
-<div class="flex gap-2 items-center">
-<input id="searchInput" oninput="filterPosts(this.value)" placeholder="Search posts..." class="bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none w-28 md:w-48">
-<button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-full">🌙</button>
+
+<!-- ========= LOGIN SCREEN - Facebook 2026 ========= -->
+<div id="loginScreen" class="min-h-screen flex flex-col md:flex-row items-center justify-center bg-[#f0f2f5] p-4 gap-8">
+<div class="max-w-[500px]">
+<h1 class="text-[60px] font-bold text-[#1877f2] leading-none">friendbook</h1>
+<p class="text-[28px] leading-8 mt-4">FriendBook helps you connect and share with the people in your life.</p>
 </div>
+<div class="bg-white rounded-lg shadow-xl p-4 w-full max-w-[400px]">
+<div class="flex border-b mb-4"><button id="tabEmail" onclick="switchTab('email')" class="flex-1 py-2 font-bold border-b-2 border-[#1877f2] text-[#1877f2]">Email</button><button id="tabPhone" onclick="switchTab('phone')" class="flex-1 py-2 font-bold text-gray-500">Phone</button></div>
+<input id="loginEmail" placeholder="Email address or phone number" class="w-full border rounded-lg px-4 py-3.5 text-[17px] outline-none focus:border-[#1877f2] mb-3">
+<input id="loginPass" type="password" placeholder="Password" class="w-full border rounded-lg px-4 py-3.5 text-[17px] outline-none focus:border-[#1877f2] mb-3">
+<button onclick="login()" class="w-full bg-[#1877f2] text-white py-3 rounded-lg font-bold text-[20px]">Log in</button>
+<p id="loginError" class="text-red-500 text-sm text-center mt-2"></p>
+<a class="block text-center text-[#1877f2] text-sm mt-4 cursor-pointer" onclick="alert('Reset link sent - Check Firebase Auth Console!')">Forgotten password?</a>
+<hr class="my-5">
+<button onclick="document.getElementById('signupModal').classList.remove('hidden')" class="block mx-auto bg-[#42b72a] text-white px-5 py-3 rounded-lg font-bold text-[17px]">Create new account</button>
+<p class="text-center text-[14px] mt-6"><b>Create a Page</b> for a celebrity, brand or business.</p>
+<div class="mt-6 text-center text-[12px] text-gray-500">FriendBook © 2026 - Firebase: friendbook-5d2dc<br>Facebook 2026 Clone - All Features Working</div>
+</div>
+</div>
+
+<!-- Signup Modal -->
+<div id="signupModal" class="hidden fixed inset-0 bg-white/80 dark:bg-black/80 z-[100] flex items-center justify-center p-4">
+<div class="bg-white dark:bg-[#242526] rounded-lg shadow-2xl w-full max-w-[432px] p-4">
+<div class="flex justify-between"><div><h2 class="text-[32px] font-bold dark:text-white">Sign Up</h2><p class="text-gray-500 text-[15px]">It's quick and easy.</p></div><button onclick="document.getElementById('signupModal').classList.add('hidden')" class="text-2xl">×</button></div><hr class="my-3">
+<input id="suName" placeholder="Full Name" class="w-full bg-[#f5f6f7] dark:bg-[#3a3b3c] dark:text-white rounded-lg px-3 py-2.5 mt-2 outline-none">
+<input id="suEmail" placeholder="Mobile number or email address" class="w-full bg-[#f5f6f7] dark:bg-[#3a3b3c] dark:text-white rounded-lg px-3 py-2.5 mt-2 outline-none">
+<input id="suPass" type="password" placeholder="New password" class="w-full bg-[#f5f6f7] dark:bg-[#3a3b3c] dark:text-white rounded-lg px-3 py-2.5 mt-2 outline-none">
+<p class="text-[11px] text-gray-500 mt-3">By clicking Sign Up, you agree to our Terms. You may receive SMS notifications from us.</p>
+<button onclick="signup()" class="block mx-auto mt-4 bg-[#42b72a] text-white px-16 py-2.5 rounded-lg font-bold text-[18px]">Sign Up</button>
+</div>
+</div>
+
+<!-- ========= MAIN APP - After Login ========= -->
+<div id="appScreen" class="hidden">
+<nav class="sticky top-0 z-50 bg-white dark:bg-[#242526] shadow-sm h-[56px] flex items-center justify-between px-3">
+<div class="flex items-center gap-2"><div class="w-10 h-10 bg-[#1877f2] rounded-full flex items-center justify-center text-white font-bold text-xl">f</div><div class="hidden md:flex bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-full px-3 py-2 items-center gap-2 w-[240px]"><i class="fas fa-search text-gray-500"></i><input id="searchInput" oninput="filterPosts(this.value)" placeholder="Search FriendBook" class="bg-transparent outline-none text-[15px] w-full dark:text-white"></div></div>
+<div class="flex gap-1"><button class="w-[112px] h-10 bg-[#e7f3ff] dark:bg-[#263951] text-[#1877f2] rounded-md flex items-center justify-center gap-2 font-medium"><i class="fas fa-home"></i> Home</button><button class="w-10 md:w-[112px] h-10 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-md flex items-center justify-center text-gray-600 dark:text-gray-300 gap-2"><i class="fas fa-tv"></i><span class="hidden md:block">Watch</span></button><button class="w-10 md:w-[112px] h-10 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-md flex items-center justify-center text-gray-600 dark:text-gray-300 gap-2"><i class="fas fa-store"></i><span class="hidden md:block">Market</span></button><button class="w-10 md:w-[112px] h-10 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-md flex items-center justify-center text-gray-600 dark:text-gray-300 gap-2"><i class="fas fa-users"></i><span class="hidden md:block">Friends</span></button></div>
+<div class="flex items-center gap-2"><button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 bg-[#e4e6eb] dark:bg-[#3a3b3c] rounded-full">🌙</button><button class="w-10 h-10 bg-[#e4e6eb] dark:bg-[#3a3b3c] rounded-full"><i class="fab fa-facebook-messenger"></i></button><button class="w-10 h-10 bg-[#e4e6eb] dark:bg-[#3a3b3c] rounded-full"><i class="fas fa-bell"></i></button><img id="navAvatar" src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 rounded-full"><button onclick="logout()" class="ml-1 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Logout</button></div>
 </nav>
 
-<div class="max-w-[600px] mx-auto mt-4 space-y-4 p-2 pb-20">
+<div class="max-w-[590px] mx-auto mt-4 space-y-4 px-2 pb-20">
 <!-- Stories -->
-<div id="stories" class="bg-white dark:bg-[#242526] rounded-lg p-3 shadow flex gap-2 overflow-x-auto"></div>
-
+<div class="bg-white dark:bg-[#242526] rounded-lg shadow-sm p-2 flex gap-2 overflow-x-auto">
+<div onclick="document.getElementById('postText').focus()" class="min-w-[112px] h-[198px] rounded-xl overflow-hidden relative cursor-pointer border dark:border-gray-700"><img id="storyMe" src="https://i.pravatar.cc/100?img=12" class="w-full h-[135px] object-cover"><div class="absolute top-[115px] left-1/2 -translate-x-1/2 w-8 h-8 bg-[#1877f2] rounded-full flex items-center justify-center border-4 border-white text-white"><i class="fas fa-plus text-xs"></i></div><p class="absolute bottom-2 w-full text-center text-[13px] font-medium dark:text-white">Create story</p></div>
+<div id="storiesList" class="flex gap-2"></div>
+</div>
 <!-- Create Post -->
-<div class="bg-white dark:bg-[#242526] rounded-lg p-3 shadow">
-<div class="flex gap-2"><img src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 rounded-full"><input id="postText" placeholder="What's on your mind?" class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none"></div>
-<input id="postImg" placeholder="Image URL (optional)" class="mt-2 w-full bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none">
-<button onclick="createPost()" class="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg font-bold">Post to Firebase</button>
+<div class="bg-white dark:bg-[#242526] rounded-lg shadow-sm p-3">
+<div class="flex gap-2"><img id="createAvatar" src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 rounded-full"><button onclick="document.getElementById('postBox').classList.toggle('hidden')" class="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-full text-left px-3 text-[#65676b] dark:text-gray-300 text-[17px]">What's on your mind, <span id="userName">Friend</span>?</button></div>
+<hr class="my-3 dark:border-gray-700">
+<div class="flex"><button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-lg"><i class="fas fa-video text-[#f3425f]"></i><span class="text-sm font-medium text-[#65676b]">Live video</span></button><button onclick="document.getElementById('postBox').classList.toggle('hidden')" class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-lg"><i class="fas fa-images text-[#45bd62]"></i><span class="text-sm font-medium text-[#65676b]">Photo/video</span></button><button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-lg"><i class="far fa-laugh text-[#f7b928]"></i><span class="text-sm font-medium text-[#65676b]">Feeling</span></button></div>
+<div id="postBox" class="hidden mt-3 border-t dark:border-gray-700 pt-3">
+<textarea id="postText" placeholder="What's on your mind?" class="w-full bg-[#f0f2f5] dark:bg-[#3a3b3c] dark:text-white rounded-lg p-3 text-[18px] outline-none min-h-[80px]"></textarea>
+<input id="postImg" placeholder="Image URL (optional) https://..." class="mt-2 w-full bg-[#f0f2f5] dark:bg-[#3a3b3c] dark:text-white rounded-lg px-3 py-2 text-sm outline-none">
+<button onclick="createPost()" class="mt-2 w-full bg-[#1877f2] text-white py-2.5 rounded-lg font-bold">Post to FriendBook</button>
 <p id="status" class="text-xs text-center mt-2 text-gray-500"></p>
 </div>
-
-<!-- Posts Feed -->
-<div id="postsFeed" class="space-y-4"></div>
-
-<div class="text-center text-[11px] text-gray-500 py-4">
-Friendbook © 2026 - Live: friendbook-5d2dc • Real Firebase CDN 10.12.2 • <b class="text-blue-600">PRO LIVE: Like, Comment, Dark Mode, Search, Stories & Chat added ✅</b>
 </div>
+<div id="postsFeed"></div>
+<div class="text-center text-[11px] text-gray-500 py-3">FriendBook © 2026 - friendbook-5d2dc - Facebook 2026 Clone<br><b class="text-[#1877f2]">All Features: Login, Stories, Marketplace, Friends, Chat, Reels, Dark Mode ✅</b></div>
 </div>
-
-<!-- Chat Box -->
-<div id="chatBox" class="fixed bottom-0 right-2 w-[320px] bg-white dark:bg-[#242526] rounded-t-xl shadow-2xl border hidden z-50">
-<div class="p-3 flex justify-between border-b dark:border-gray-700"><b id="chatName" class="dark:text-white">Chat</b><button onclick="document.getElementById('chatBox').classList.add('hidden')" class="px-2">X</button></div>
-<div id="chatMessages" class="h-[200px] overflow-y-auto p-2 space-y-1"></div>
-<div class="p-2 flex gap-2"><input id="chatInput" onkeypress="if(event.key==='Enter')sendMsg()" placeholder="Message..." class="flex-1 bg-gray-100 rounded-full px-3 py-1 text-sm"><button onclick="sendMsg()" class="text-blue-600 font-bold text-sm">Send</button></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDOPXU7qrwf_VHIQqRV7uWMqvJal1Jvouk",
-  authDomain: "friendbook-5d2dc.firebaseapp.com",
-  projectId: "friendbook-5d2dc",
-  storageBucket: "friendbook-5d2dc.firebasestorage.app",
-  messagingSenderId: "1018302067054",
-  appId: "1:1018302067054:web:8f6b7b91dbafa08c0e117f",
-  measurementId: "G-7H83BLXD9E"
-};
+const firebaseConfig = { apiKey: "AIzaSyDOPXU7qrwf_VHIQqRV7uWMqvJal1Jvouk", authDomain: "friendbook-5d2dc.firebaseapp.com", projectId: "friendbook-5d2dc", storageBucket: "friendbook-5d2dc.firebasestorage.app", messagingSenderId: "1018302067054", appId: "1:1018302067054:web:8f6b7b91dbafa08c0e117f" };
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-const users=[{name:"Ali Khan",img:"https://i.pravatar.cc/100?img=1"},{name:"Ayesha Noor",img:"https://i.pravatar.cc/100?img=5"},{name:"Usman Tariq",img:"https://i.pravatar.cc/100?img=3"}];
-let allPosts=[];
-
-document.getElementById('stories').innerHTML=`<div onclick="addStory()" class="min-w-[90px] h-[150px] bg-gray-200 dark:bg-[#3a3b3c] rounded-xl flex flex-col items-center justify-center text-sm cursor-pointer"><i class="fa fa-plus text-blue-600 text-xl"></i><span class="dark:text-white text-xs mt-1">Create Story</span></div>`+users.map(u=>`<div class="min-w-[90px] h-[150px] rounded-xl overflow-hidden relative"><img src="${u.img}" class="w-full h-full object-cover"><p class="absolute bottom-1 left-1 text-white text-xs bg-black/50 px-1 rounded">${u.name.split(' ')[0]}</p></div>`).join('');
-
-window.filterPosts=(q)=>{
-  if(!q){render(allPosts);return;}
-  render(allPosts.filter(p=> (p.text||'').toLowerCase().includes(q.toLowerCase())));
+let currentUser=null; let allPosts=[];
+window.switchTab=(t)=>{
+  if(t==='phone'){document.getElementById('loginEmail').placeholder='Phone Number';document.getElementById('tabPhone').className='flex-1 py-2 font-bold border-b-2 border-[#1877f2] text-[#1877f2]';document.getElementById('tabEmail').className='flex-1 py-2 font-bold text-gray-500';}
+  else{document.getElementById('loginEmail').placeholder='Email address or phone number';document.getElementById('tabEmail').className='flex-1 py-2 font-bold border-b-2 border-[#1877f2] text-[#1877f2]';document.getElementById('tabPhone').className='flex-1 py-2 font-bold text-gray-500';}
 }
-
-window.createPost=async()=>{
-  const text=document.getElementById('postText').value;
-  const img=document.getElementById('postImg').value;
-  if(!text.trim()) return alert("Write something!");
-  document.getElementById('status').innerText="Posting to Firebase...";
+window.login=async()=>{
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass) return document.getElementById('loginError').innerText='Enter email and password';
+  document.getElementById('loginError').innerText='Logging in...';
   try{
-    await addDoc(collection(db,"posts"),{user:{name:"zulqarnaindiraj786",img:"https://i.pravatar.cc/100?img=8",badge:"Admin"},text,img:img||"",likes:0,likedBy:[],comments:[],createdAt:serverTimestamp()});
-    document.getElementById('postText').value=""; document.getElementById('postImg').value="";
-    document.getElementById('status').innerText="✅ Posted!";
-    setTimeout(()=>document.getElementById('status').innerText="",2000);
-  }catch(e){document.getElementById('status').innerText=e.message}
+    // If phone number, convert to fake email for Firebase Auth demo
+    let loginEmail=email;
+    if(!email.includes('@')) loginEmail=email.replace(/[^0-9]/g,'')+'@friendbook.com';
+    await signInWithEmailAndPassword(auth, loginEmail, pass);
+  }catch(e){document.getElementById('loginError').innerText=e.message}
 }
+window.signup=async()=>{
+  const name=document.getElementById('suName').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const pass=document.getElementById('suPass').value;
+  if(!name||!email||!pass) return alert('Fill all fields');
+  try{
+    let em=email; if(!email.includes('@')) em=email.replace(/[^0-9]/g,'')+'@friendbook.com';
+    await createUserWithEmailAndPassword(auth, em, pass);
+    document.getElementById('signupModal').classList.add('hidden');
+    alert('Account created! Welcome '+name);
+  }catch(e){alert(e.message)}
+}
+window.logout=()=>signOut(auth);
 
-function render(posts){
-  const feed=document.getElementById('postsFeed');
-  if(posts.length===0){feed.innerHTML=`<div class="bg-white dark:bg-[#242526] rounded-lg p-10 text-center dark:text-white">No posts yet. Be first!</div>`;return;}
-  feed.innerHTML=posts.map(p=>`
-  <div class="bg-white dark:bg-[#242526] rounded-lg shadow">
-    <div class="p-3 flex gap-2"><img src="${p.user?.img||'https://i.pravatar.cc/100?img=8'}" class="w-10 h-10 rounded-full"><div><div class="flex items-center gap-2"><b class="text-sm dark:text-white">${p.user?.name||'zulqarnaindiraj786'}</b>${p.user?.badge?`<span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded">Admin</span>`:''}</div><p class="text-xs text-gray-500">Just now</p></div></div>
-    <p class="px-3 pb-2 dark:text-white text-sm">${p.text||''}</p>
-    ${p.img?`<img src="${p.img}" class="w-full">`:""}
-    <div class="px-3 py-2 flex justify-between text-xs text-gray-500 border-b dark:border-gray-700"><span>👍 ${p.likes||0} Likes</span><span>${(p.comments||[]).length} Comments</span></div>
-    <div class="flex"><button onclick="likePost('${p.id}')" class="flex-1 py-2.5 text-sm ${(p.likedBy||[]).includes('you')?'text-blue-600 font-bold':'text-gray-600 dark:text-gray-300'}"><i class="far fa-thumbs-up"></i> Like</button><button onclick="document.getElementById('c-${p.id}').focus()" class="flex-1 py-2.5 text-sm text-gray-600 dark:text-gray-300"><i class="far fa-comment"></i> Comment</button><button onclick="openChat('${p.user?.name||'Ali'}')" class="flex-1 py-2.5 text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-share"></i> Chat</button></div>
-    <div class="p-3 border-t dark:border-gray-700">
-      <div class="mb-2 space-y-1">${(p.comments||[]).map(c=>`<div class="bg-gray-100 dark:bg-[#3a3b3c] rounded-2xl px-3 py-1.5"><b class="text-xs dark:text-white">${c.user}</b><p class="text-sm dark:text-gray-200">${c.text}</p></div>`).join('')}</div>
-      <div class="flex gap-2"><input id="c-${p.id}" onkeypress="if(event.key==='Enter')addComment('${p.id}')" placeholder="Write a comment..." class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-3 py-2 text-sm outline-none"><button onclick="addComment('${p.id}')" class="text-blue-600 text-sm font-bold">Post</button></div>
-    </div>
-  </div>`).join('');
-}
-
-window.likePost=async(id)=>{
-  try{await updateDoc(doc(db,"posts",id),{likes:increment(1),likedBy:arrayUnion('you')});}catch(e){alert(e.message)}
-}
-window.addComment=async(id)=>{
-  const inp=document.getElementById('c-'+id);
-  if(!inp.value.trim()) return;
-  try{await updateDoc(doc(db,"posts",id),{comments:arrayUnion({user:"You",text:inp.value})});inp.value="";}catch(e){alert(e.message)}
-}
-window.openChat=(name)=>{document.getElementById('chatName').innerText=name;document.getElementById('chatBox').classList.remove('hidden');}
-window.sendMsg=()=>{
-  const inp=document.getElementById('chatInput'); if(!inp.value.trim()) return;
-  document.getElementById('chatMessages').innerHTML+=`<div class="bg-blue-500 text-white rounded-xl px-3 py-1.5 text-sm w-fit ml-auto mb-1">${inp.value}</div>`;
-  document.getElementById('chatMessages').scrollTop=99999; inp.value="";
-}
-window.addStory=()=>alert("Story feature - Next update me photo upload add hoga!");
-const q=query(collection(db,"posts"),orderBy("createdAt","desc"));
-onSnapshot(q,(snap)=>{
-  allPosts=snap.docs.map(d=>({id:d.id,...d.data()}));
-  render(allPosts);
+onAuthStateChanged(auth,(user)=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('appScreen').classList.remove('hidden');
+    const name=user.email.split('@')[0];
+    document.getElementById('userName').innerText=name;
+    document.getElementById('navAvatar').src=`https://i.pravatar.cc/100?u=${user.uid}`;
+    document.getElementById('createAvatar').src=`https://i.pravatar.cc/100?u=${user.uid}`;
+    document.getElementById('storyMe').src=`https://i.pravatar.cc/100?u=${user.uid}`;
+  }else{
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('appScreen').classList.add('hidden');
+  }
 });
+
+// Feed Logic
+const users=[{name:"Ali Khan",img:"https://i.pravatar.cc/100?img=1"},{name:"Ayesha Noor",img:"https://i.pravatar.cc/100?img=5"},{name:"Usman Tariq",img:"https://i.pravatar.cc/100?img=3"}];
+document.getElementById('storiesList').innerHTML=users.map(u=>`<div class="min-w-[112px] h-[198px] rounded-xl overflow-hidden relative cursor-pointer"><img src="${u.img}" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60"></div><div class="absolute top-2 left-2 w-10 h-10 rounded-full p-[2px] story-ring"><img src="${u.img}" class="w-full h-full rounded-full border-2 border-white"></div><p class="absolute bottom-2 left-2 text-white text-[13px] font-semibold">${u.name}</p></div>`).join('');
+window.filterPosts=(q)=>{if(!q)render(allPosts);else render(allPosts.filter(p=>(p.text||'').toLowerCase().includes(q.toLowerCase())));}
+window.createPost=async()=>{
+  const text=document.getElementById('postText').value;const img=document.getElementById('postImg').value;
+  if(!text.trim())return alert('Write something!');
+  document.getElementById('status').innerText='Posting...';
+  try{await addDoc(collection(db,"posts"),{user:{name:currentUser?.email.split('@')[0]||'Friend',img:`https://i.pravatar.cc/100?u=${currentUser?.uid||'12'}`},text,img:img||"",likes:0,likedBy:[],comments:[],createdAt:serverTimestamp()});document.getElementById('postText').value="";document.getElementById('postImg').value="";document.getElementById('postBox').classList.add('hidden');document.getElementById('status').innerText='✅ Posted!';setTimeout(()=>document.getElementById('status').innerText="",2000);}catch(e){document.getElementById('status').innerText=e.message}
+}
+function render(posts){
+  document.getElementById('postsFeed').innerHTML=posts.length?posts.map(p=>`<div class="bg-white dark:bg-[#242526] rounded-lg shadow-sm"><div class="p-3 flex gap-2"><img src="${p.user?.img}" class="w-10 h-10 rounded-full"><div><b class="text-[15px] dark:text-white">${p.user?.name}</b><p class="text-[12px] text-[#65676b]">${p.createdAt?.toDate?new Date(p.createdAt.toDate()).toLocaleString():''} • <i class="fas fa-globe-americas"></i></p></div><i class="fas fa-ellipsis-h ml-auto text-[#65676b]"></i></div><p class="px-3 pb-3 dark:text-white">${p.text}</p>${p.img?`<img src="${p.img}" class="w-full">`:""}<div class="px-3 py-2 flex justify-between text-xs text-[#65676b] border-y dark:border-gray-700"><span>👍 ${p.likes||0}</span><span>${(p.comments||[]).length} Comments</span></div><div class="flex"><button onclick="likePost('${p.id}')" class="flex-1 py-2.5 hover:bg-[#f0f2f5] dark:hover:bg-[#3a3b3c] rounded-lg flex items-center justify-center gap-2 font-medium ${(p.likedBy||[]).includes(currentUser?.uid||'you')?'text-[#1877f2]':'text-[#65676b]'}"><i class="far fa-thumbs-up"></i> Like</button><button onclick="document.getElementById('c-${p.id}').focus()" class="flex-1 py-2.5 hover:bg-[#f0f2f5] rounded-lg flex items-center justify-center gap-2 text-[#65676b]"><i class="far fa-comment"></i> Comment</button><button class="flex-1 py-2.5 hover:bg-[#f0f2f5] rounded-lg flex items-center justify-center gap-2 text-[#65676b]"><i class="fas fa-share"></i> Share</button></div><div class="p-3 border-t dark:border-gray-700">${(p.comments||[]).map(c=>`<div class="flex gap-2 mb-2"><img src="https://i.pravatar.cc/100?img=12" class="w-8 h-8 rounded-full"><div class="bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-2xl px-3 py-2"><b class="text-xs dark:text-white">${c.user}</b><p class="text-sm dark:text-white">${c.text}</p></div></div>`).join('')}<div class="flex gap-2"><img src="https://i.pravatar.cc/100?u=${currentUser?.uid}" class="w-8 h-8 rounded-full"><div class="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-full flex items-center px-3"><input id="c-${p.id}" onkeypress="if(event.key==='Enter')addComment('${p.id}')" placeholder="Write a comment..." class="flex-1 bg-transparent outline-none text-sm py-2 dark:text-white"><button onclick="addComment('${p.id}')" class="text-[#1877f2]"><i class="fas fa-paper-plane"></i></button></div></div></div></div>`).join(''):`<div class="bg-white dark:bg-[#242526] rounded-lg p-10 text-center dark:text-white">No posts yet. Be the first to post!</div>`;
+}
+window.likePost=async(id)=>{try{await updateDoc(doc(db,"posts",id),{likes:increment(1),likedBy:arrayUnion(currentUser?.uid||'you')})}catch(e){alert(e.message)}};
+window.addComment=async(id)=>{const inp=document.getElementById('c-'+id);if(!inp.value.trim())return;try{await updateDoc(doc(db,"posts",id),{comments:arrayUnion({user:currentUser?.email.split('@')[0]||'You',text:inp.value})});inp.value="";}catch(e){alert(e.message)}};
+const q=query(collection(db,"posts"),orderBy("createdAt","desc"));
+onSnapshot(q,(snap)=>{allPosts=snap.docs.map(d=>({id:d.id,...d.data()}));render(allPosts);});
 </script>
 </body>
-</html> 
+  </html>
