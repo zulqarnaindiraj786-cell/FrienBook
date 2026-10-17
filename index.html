@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FrienBook Pro</title>
+<title>FrienBook Pro - Firebase</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script>tailwind.config={darkMode:'class'}</script>
@@ -11,45 +11,113 @@
 <body class="bg-[#f0f2f5] dark:bg-[#18191a]">
 <nav class="sticky top-0 z-50 bg-white dark:bg-[#242526] p-2 flex justify-between items-center shadow">
 <h1 class="text-2xl font-bold text-blue-600">FrienBook</h1>
-<div class="flex gap-2">
-<input id="searchInput" oninput="renderPosts(this.value)" placeholder="Search" class="bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none">
-<button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 bg-gray-200 rounded-full">🌙</button>
+<div class="flex gap-2 items-center">
+<input id="searchInput" oninput="filterPosts(this.value)" placeholder="Search posts..." class="bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none w-28 md:w-48">
+<button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-full">🌙</button>
 </div>
 </nav>
 
-<div id="postsFeed" class="max-w-[600px] mx-auto mt-4 space-y-4 p-2"></div>
+<div class="max-w-[600px] mx-auto mt-4 space-y-4 p-2">
+<!-- Stories -->
+<div id="stories" class="bg-white dark:bg-[#242526] rounded-lg p-3 shadow flex gap-2 overflow-x-auto"></div>
 
-<div id="chatBox" class="fixed bottom-0 right-2 w-[300px] bg-white dark:bg-[#242526] rounded-t-xl shadow-2xl border hidden">
-<div class="p-3 flex justify-between border-b"><b id="chatName" class="dark:text-white"></b><button onclick="document.getElementById('chatBox').classList.add('hidden')">X</button></div>
-<div id="chatMessages" class="h-[200px] overflow-y-auto p-2"></div>
-<div class="p-2 flex gap-2"><input id="chatInput" onkeypress="if(event.key==='Enter')sendMsg()" placeholder="Message..." class="flex-1 bg-gray-100 rounded-full px-3 py-1 text-sm"><button onclick="sendMsg()" class="text-blue-600 font-bold">Send</button></div>
+<!-- Create Post -->
+<div class="bg-white dark:bg-[#242526] rounded-lg p-3 shadow">
+<div class="flex gap-2"><img src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 rounded-full"><input id="postText" placeholder="What's on your mind?" class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none"></div>
+<input id="postImg" placeholder="Image URL (optional)" class="mt-2 w-full bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-4 py-2 text-sm outline-none">
+<button onclick="createPost()" class="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg font-bold">Post</button>
 </div>
 
-<script>
+<!-- Posts Feed -->
+<div id="postsFeed" class="space-y-4"></div>
+</div>
+
+<!-- Chat Box -->
+<div id="chatBox" class="fixed bottom-0 right-2 w-[300px] bg-white dark:bg-[#242526] rounded-t-xl shadow-2xl border hidden">
+<div class="p-3 flex justify-between border-b"><b id="chatName" class="dark:text-white">Chat</b><button onclick="document.getElementById('chatBox').classList.add('hidden')" class="px-2">X</button></div>
+<div id="chatMessages" class="h-[200px] overflow-y-auto p-2 space-y-1"></div>
+<div class="p-2 flex gap-2"><input id="chatInput" onkeypress="if(event.key==='Enter')sendMsg()" placeholder="Message..." class="flex-1 bg-gray-100 rounded-full px-3 py-1 text-sm"><button onclick="sendMsg()" class="text-blue-600 font-bold text-sm">Send</button></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDOPXU7qrwf_VHIQqRV7uWMqvJal1Jvouk",
+  authDomain: "friendbook-5d2dc.firebaseapp.com",
+  projectId: "friendbook-5d2dc",
+  storageBucket: "friendbook-5d2dc.firebasestorage.app",
+  messagingSenderId: "1018302067054",
+  appId: "1:1018302067054:web:8f6b7b91dbafa08c0e117f",
+  measurementId: "G-7H83BLXD9E"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const users=[{name:"Ali Khan",img:"https://i.pravatar.cc/100?img=1"},{name:"Ayesha Noor",img:"https://i.pravatar.cc/100?img=5"},{name:"Usman Tariq",img:"https://i.pravatar.cc/100?img=3"}];
-let posts=[
-{id:1,user:users[0],text:"FrienBook Pro LIVE! Like, Comment, Dark Mode, Search, Stories & Chat added! 🚀🇵🇰",img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600",likes:128,liked:false,comments:[{user:"Ayesha",text:"Zabardast!"}],time:"2h"},
-{id:2,user:users[1],text:"Karachi Sea View 🌅",img:"https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600",likes:89,liked:false,comments:[],time:"5h"}
-];
-function renderPosts(f=""){
-let feed=document.getElementById('postsFeed');
-let h=`<div class="bg-white dark:bg-[#242526] rounded-lg p-3 shadow flex gap-2 overflow-x-auto"><div class="min-w-[90px] h-[150px] bg-gray-200 rounded-xl flex items-center justify-center text-sm">+ Create Story</div>${users.map(u=>`<div class="min-w-[90px] h-[150px] rounded-xl overflow-hidden relative"><img src="${u.img}" class="w-full h-full object-cover"><p class="absolute bottom-1 left-1 text-white text-xs bg-black/50 px-1 rounded">${u.name.split(' ')[0]}</p></div>`).join('')}</div>`;
-posts.filter(p=>p.text.toLowerCase().includes(f.toLowerCase())).forEach(p=>{
-h+=`<div class="bg-white dark:bg-[#242526] rounded-lg shadow">
-<div class="p-3 flex gap-2"><img src="${p.user.img}" class="w-10 h-10 rounded-full"><div><p class="font-bold dark:text-white text-sm">${p.user.name}</p><p class="text-xs text-gray-500">${p.time}</p></div></div>
-<p class="px-3 pb-2 dark:text-white text-sm">${p.text}</p>
-${p.img?`<img src="${p.img}" class="w-full">`:""}
-<div class="px-3 py-2 flex justify-between text-xs text-gray-500 border-b"><span>👍 ${p.likes} Likes</span><span>${p.comments.length} Comments</span></div>
-<div class="flex"><button onclick="likePost(${p.id})" class="flex-1 py-2 text-sm ${p.liked?'text-blue-600 font-bold':'text-gray-600 dark:text-gray-300'}"><i class="far fa-thumbs-up"></i> Like</button><button onclick="document.getElementById('c-${p.id}').focus()" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300">Comment</button><button onclick="openChat('${p.user.name}')" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300">Chat</button></div>
-<div class="p-3 border-t"><div class="mb-2 space-y-1">${p.comments.map(c=>`<div class="bg-gray-100 dark:bg-[#3a3b3c] rounded-2xl px-3 py-1"><b class="text-xs dark:text-white">${c.user}</b><p class="text-sm dark:text-gray-200">${c.text}</p></div>`).join('')}</div><div class="flex gap-2"><input id="c-${p.id}" onkeypress="if(event.key==='Enter')addComment(${p.id})" placeholder="Write a comment..." class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-3 py-2 text-sm outline-none"><button onclick="addComment(${p.id})" class="text-blue-600 text-sm font-bold">Post</button></div></div>
-</div>`});
-feed.innerHTML=h;
+let allPosts=[];
+
+// Stories render
+document.getElementById('stories').innerHTML=`<div class="min-w-[90px] h-[150px] bg-gray-200 dark:bg-[#3a3b3c] rounded-xl flex flex-col items-center justify-center text-sm cursor-pointer"><i class="fa fa-plus text-blue-600 text-xl"></i><span class="dark:text-white text-xs mt-1">Create Story</span></div>`+users.map(u=>`<div class="min-w-[90px] h-[150px] rounded-xl overflow-hidden relative"><img src="${u.img}" class="w-full h-full object-cover"><p class="absolute bottom-1 left-1 text-white text-xs bg-black/50 px-1 rounded">${u.name.split(' ')[0]}</p></div>`).join('');
+
+window.filterPosts=(q)=>{
+  render(allPosts.filter(p=> (p.text||'').toLowerCase().includes(q.toLowerCase())));
 }
-function likePost(id){let p=posts.find(x=>x.id==id);p.liked=!p.liked;p.likes+=p.liked?1:-1;renderPosts(document.getElementById('searchInput').value)}
-function addComment(id){let inp=document.getElementById('c-'+id);if(!inp.value.trim())return;posts.find(x=>x.id==id).comments.push({user:"You",text:inp.value});inp.value="";renderPosts(document.getElementById('searchInput').value)}
-function openChat(name){document.getElementById('chatName').innerText=name;document.getElementById('chatBox').classList.remove('hidden');document.getElementById('chatMessages').innerHTML=`<div class="bg-gray-200 rounded-xl px-3 py-1 text-sm w-fit mb-1">Hi from ${name}! 😊</div>`}
-function sendMsg(){let inp=document.getElementById('chatInput');if(!inp.value.trim())return;document.getElementById('chatMessages').innerHTML+=`<div class="bg-blue-500 text-white rounded-xl px-3 py-1 text-sm w-fit ml-auto mb-1">${inp.value}</div>`;inp.value=""}
-renderPosts();
+
+window.createPost=async()=>{
+  const text=document.getElementById('postText').value;
+  const img=document.getElementById('postImg').value;
+  if(!text.trim()) return alert("Write something!");
+  await addDoc(collection(db,"posts"),{user:users[0],text,img:img||"",likes:0,likedBy:[],comments:[],createdAt:serverTimestamp()});
+  document.getElementById('postText').value=""; document.getElementById('postImg').value="";
+}
+
+function render(posts){
+  const feed=document.getElementById('postsFeed');
+  if(posts.length==0){feed.innerHTML=`<div class="bg-white dark:bg-[#242526] rounded-lg p-10 text-center dark:text-white">No posts found</div>`;return;}
+  feed.innerHTML=posts.map(p=>`
+  <div class="bg-white dark:bg-[#242526] rounded-lg shadow">
+    <div class="p-3 flex gap-2"><img src="${p.user?.img||users[0].img}" class="w-10 h-10 rounded-full"><div><p class="font-bold dark:text-white text-sm">${p.user?.name||'Ali Khan'}</p><p class="text-xs text-gray-500">${p.createdAt?.toDate? p.createdAt.toDate().toLocaleString(): 'Just now'}</p></div></div>
+    <p class="px-3 pb-2 dark:text-white text-sm">${p.text||''}</p>
+    ${p.img?`<img src="${p.img}" class="w-full">`:""}
+    <div class="px-3 py-2 flex justify-between text-xs text-gray-500 border-b"><span>👍 ${p.likes||0} Likes</span><span>${(p.comments||[]).length} Comments</span></div>
+    <div class="flex"><button onclick="likePost('${p.id}')" class="flex-1 py-2 text-sm ${(p.likedBy||[]).includes('you')?'text-blue-600 font-bold':'text-gray-600 dark:text-gray-300'}"><i class="far fa-thumbs-up"></i> Like</button><button onclick="document.getElementById('c-${p.id}').focus()" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300">Comment</button><button onclick="openChat('${p.user?.name||'Ali'}')" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300">Chat</button></div>
+    <div class="p-3 border-t">
+      <div class="mb-2 space-y-1">${(p.comments||[]).map(c=>`<div class="bg-gray-100 dark:bg-[#3a3b3c] rounded-2xl px-3 py-1"><b class="text-xs dark:text-white">${c.user}</b><p class="text-sm dark:text-gray-200">${c.text}</p></div>`).join('')}</div>
+      <div class="flex gap-2"><input id="c-${p.id}" onkeypress="if(event.key==='Enter')addComment('${p.id}')" placeholder="Write a comment..." class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] dark:text-white rounded-full px-3 py-2 text-sm outline-none"><button onclick="addComment('${p.id}')" class="text-blue-600 text-sm font-bold">Post</button></div>
+    </div>
+  </div>`).join('');
+}
+
+window.likePost=async(id)=>{
+  const ref=doc(db,"posts",id);
+  await updateDoc(ref,{likes:increment(1),likedBy:arrayUnion('you')});
+}
+window.addComment=async(id)=>{
+  const inp=document.getElementById('c-'+id);
+  if(!inp.value.trim()) return;
+  const ref=doc(db,"posts",id);
+  await updateDoc(ref,{comments:arrayUnion({user:"You",text:inp.value})});
+  inp.value="";
+}
+window.openChat=(name)=>{document.getElementById('chatName').innerText=name;document.getElementById('chatBox').classList.remove('hidden');}
+window.sendMsg=()=>{
+  const inp=document.getElementById('chatInput'); if(!inp.value.trim()) return;
+  document.getElementById('chatMessages').innerHTML+=`<div class="bg-blue-500 text-white rounded-xl px-3 py-1 text-sm w-fit ml-auto mb-1">${inp.value}</div>`;
+  inp.value="";
+}
+
+// Real-time posts
+const q=query(collection(db,"posts"),orderBy("createdAt","desc"));
+onSnapshot(q,(snap)=>{
+  allPosts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(allPosts.length==0){
+    // show demo if empty
+    allPosts=[{id:'demo1',user:users[0],text:"FrienBook Pro + Firebase LIVE! 🚀",img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600",likes:128,comments:[{user:"Ayesha",text:"Zabardast!"}],createdAt:{toDate:()=>new Date()}}];
+  }
+  render(allPosts);
+});
 </script>
 </body>
-</html>
+  </html>
